@@ -69,5 +69,5 @@ merge_data_filtered = cbind(merge_data_filtered, data_frame_mri_averages[,2:ncol
 
 ##### Save #####
 save_folder = load_folder
-save_file_name = "abcd_r4_AutAnxMri_PhewasVars_AncestryFiltered-EURonly_LongitudinalFiltered-BaselineOnly_MRIFiltered-GoodScansOnlyAndExtremesRemovedAndHemispheresAveraged.Rda"
+save_file_name = "abcd_r4_AutAnxMri_PhewasVars_4.Rda"
 save(merge_data_filtered, file = paste0(save_folder, save_file_name))

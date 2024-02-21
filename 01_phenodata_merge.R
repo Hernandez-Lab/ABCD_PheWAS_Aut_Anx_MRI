@@ -50,16 +50,28 @@ pcs[cols] <- lapply(pcs[cols], as.numeric)
 colnames(pcs)[cols] <- c("pc1", "pc2", "pc3", "pc4", "pc5", "pc6", "pc7", "pc8", "pc9", "pc10")
 merge_data <- merge(merge_data, pcs, by = c("subjectkey"), all.x = TRUE)
 
+##### Genetic Relatedness data to remove siblings
+# Had to make local copy due to length of file name
+grm_folder = "G:/My Drive/UCLA/HernandezLab/Datasets/"
+gr_lessthan0_05 <- read.delim(paste0(grm_folder, "EUR_6679_GRM_adj0.05.txt"), header = FALSE, na.strings = c("", "NA"))
+colnames(gr_lessthan0_05)[1] <- "subjectkey"
+gr_lessthan0_05[,1] = sub(".*?_","",gr_lessthan0_05[,1])
+gr_lessthan0_05[,2] = 1
+# Use this intersection during culling below
+
 ##### Initial data culling #####
 # (only want baseline measurements - no longitudinal)
 merge_data <- merge_data[merge_data$eventname == 'baseline_year_1_arm_1',]
 merge_data <- merge_data[merge_data$genotype_ancestry == 'EUR',]
+grm_data_intersect <- intersect(merge_data$subjectkey, gr_lessthan0_05[,1])
+merge_data = merge_data[merge_data$subjectkey %in% grm_data_intersect,]
 
 ##### Other Participant information (ethnicty, etc) #####
 community <- read.delim(paste0(abcd_folder, 'acspsw03.txt'), header = TRUE, na.strings = c("", "NA"))
 community <- community[-c(1),]
-community <- select(community, subjectkey, eventname, race_ethnicity)
-community$race_ethnicity <- as.factor(community$race_ethnicity)
+community <- select(community, subjectkey, eventname, race_ethnicity, rel_family_id, rel_group_id, rel_relationship)
+community[c("race_ethnicity", "rel_relationship")] <- lapply(community[c("race_ethnicity", "rel_relationship")], as.factor)
+community[c("rel_family_id", "rel_group_id")] <- lapply(community[c("rel_family_id", "rel_group_id")], as.numeric)
 merge_data <- merge(merge_data, community, by = c("subjectkey", "eventname"), all.x = TRUE)
 
 ##### Add CBCL t-scores (anxiety) #####
